@@ -2,7 +2,7 @@ from django.db import models
 
 
 # Create your models here.
-def Huts(models.Model):
+class Huts(models.Model):
     hutname = models.CharField(max_length=128)
     image = models.ImageField()
     altitude = models.IntegerField()
