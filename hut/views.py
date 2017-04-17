@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import base64
 
 from hut.forms import AddHutForm
 from hut.models import Huts
@@ -26,6 +27,10 @@ def add_hut(request):
     if request.method == 'POST':
         form = AddHutForm(request.POST, request.FILES)
         if form.is_valid():
+            # form.cleaned_data['image'] =\
+            #     base64.b64encode(request.FILES['image'].file.read())
+            # import  ipdb; ipdb.set_trace()
+            # print(len(form.cleaned_data['image']))
             form.save()
             return render(request, 'test.html', locals())
     if request.method == 'GET':

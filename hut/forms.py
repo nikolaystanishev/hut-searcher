@@ -19,7 +19,7 @@ class AddHutForm(forms.ModelForm):
         widgets = {
             'hutname': forms.TextInput(attrs={'class': 'form-control',
                                               'placeholder': 'Hutname'}),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control',
+            'image': forms.FileInput(attrs={'class': 'form-control',
                                                      'placeholder': 'Image'}),
             'altitude': forms.NumberInput(attrs={'class': 'form-control',
                                                  'placeholder': 'Altitude'}),
