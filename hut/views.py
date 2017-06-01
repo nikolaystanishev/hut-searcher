@@ -1,79 +1,88 @@
-from django.shortcuts import render, redirect
+from rest_framework import serializers, viewsets
+from django.template.response import TemplateResponse
+from django.shortcuts import redirect
 
-from hut.forms import AddHutForm
 from hut.models import Huts
+from hut.forms import AddHutForm
 
 
-# Create your views here.
+def huts(request):
+    return TemplateResponse(request, 'huts.html', {})
+
+
 def home(request):
-    return render(request, 'navbar.html', locals())
+    return TemplateResponse(request, 'home.html', {})
 
 
-def all_huts(request):
-    if request.method == 'GET':
-        huts = Huts.objects.all()
-        return render(request, 'show_all_huts.html', locals())
+def hut(request, hutname):
+    return TemplateResponse(request, 'hut.html', {"hutname": hutname})
 
 
-def add_hut(request):
-    if request.method == 'POST':
-        form = AddHutForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('/huts')
-    if request.method == 'GET':
-        form = AddHutForm()
-    return render(request, 'add_hut.html', locals())
+def add(request):
+    return TemplateResponse(request, 'add.html', {"form": AddHutForm()})
 
 
-def show_hut(request, hutname):
-    if request.method == 'GET':
-        huts = Huts.objects.filter(hutname__icontains=hutname)
-        return render(request, 'show_all_huts.html', locals())
+def add_form(request):
+    form = AddHutForm(request.POST, request.FILES)
+    if form.is_valid():
+        form.save()
+        return redirect('http://localhost:8000/huts')
 
 
-def update_hut(request, hutname):
-    print('-----------', request.method)
-    if request.method == 'POST':
-        form = AddHutForm(request.POST, request.FILES)
-        if form.is_valid():
-            hut = Huts.objects\
-                      .filter(hutname__icontains=form.cleaned_data['hutname'])\
-                      .first()
-            hut.image = form.cleaned_data['image']
-            hut.altitude = form.cleaned_data['altitude']
-            hut.mountain = form.cleaned_data['mountain']
-            hut.people_capacity = form.cleaned_data['people_capacity']
-            hut.email = form.cleaned_data['email']
-            hut.image = form.cleaned_data['image']
-            hut.phone = form.cleaned_data['phone']
-            hut.save()
-            return redirect('/huts')
-    if request.method == 'DELETE':
-        pass
-    if request.method == 'GET':
-        hut = Huts.objects.filter(hutname__icontains=hutname).first()
-        form = AddHutForm(initial={'hutname': hut.hutname,
-                                   'image': hut.image,
-                                   'altitude': hut.altitude,
-                                   'mountain': hut.mountain,
-                                   'people_capacity': hut.people_capacity,
-                                   'email': hut.email,
-                                   'phone': hut.phone})
-    return render(request, 'update_hut.html', locals())
+def huts_page(request, page):
+    return TemplateResponse(request, 'hut_page.html', {"page": page})
 
 
-def huts_by_mountain(request):
-    if request.method == 'GET':
-        # TODO: handel for query
-        pass
+def update(request, hutname):
+    hut = Huts.objects.filter(hutname__icontains=hutname).first()
+    form = AddHutForm(initial={'hutname': hut.hutname,
+                               'image': hut.image,
+                               'altitude': hut.altitude,
+                               'mountain': hut.mountain,
+                               'people_capacity': hut.people_capacity,
+                               'email': hut.email,
+                               'phone': hut.phone})
+    return TemplateResponse(request, 'update.html', {"form": form})
 
 
-def hut_by_name(request):
-    if request.method == 'GET':
-        pass
+def update_form(request):
+    form = AddHutForm(request.POST, request.FILES)
+    if form.is_valid():
+        hut = Huts.objects\
+                  .filter(hutname__icontains=form.cleaned_data['hutname'])\
+                  .first()
+        print(hut.hutname)
+        hut.image = form.cleaned_data['image']
+        hut.altitude = form.cleaned_data['altitude']
+        hut.mountain = form.cleaned_data['mountain']
+        hut.people_capacity = form.cleaned_data['people_capacity']
+        hut.email = form.cleaned_data['email']
+        hut.image = form.cleaned_data['image']
+        hut.phone = form.cleaned_data['phone']
+        hut.save()
+        return redirect('http://localhost:8000/huts')
 
 
-def page_of_huts(request):
-    if request.method == 'GET':
-        pass
+def delete(request):
+    return TemplateResponse(request, 'delete.html', {})
+
+
+# Serializers define the API representation.
+class HutsSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Huts
+        fields = '__all__'
+
+
+# ViewSets define the view behavior.
+class HutsViewSet(viewsets.ModelViewSet):
+    queryset = Huts.objects.all()
+    serializer_class = HutsSerializer
+    lookup_field = 'hutname__icontains'
+    pagination_class = None
+    # paginate_by = 3
+
+
+class HutViewSet(viewsets.ModelViewSet):
+    queryset = Huts.objects.all()
+    serializer_class = HutsSerializer
